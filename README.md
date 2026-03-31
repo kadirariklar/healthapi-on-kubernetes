@@ -25,6 +25,7 @@ Key points:
   - [2) Docker](#2-docker)
   - [3) kubectl (macOS)](#3-kubectl-macos)
   - [4) Minikube (macOS)](#4-minikube-macos)
+  - [5) Helm (macOS)](#5-helm-macos)
 - [Step-by-Step Deployment](#step-by-step-deployment)
   - [Step 1: Clone the repository](#step-1-clone-the-repository)
   - [Step 2: Create the .NET project (HealthApi)](#step-2-create-the-net-project-healthapi)
@@ -37,6 +38,7 @@ Key points:
   - [Step 9: Start Minikube tunnel](#step-9-start-minikube-tunnel)
   - [Step 10: Deploy Kubernetes manifests](#step-10-deploy-kubernetes-manifests)
   - [Step 11: Verify and access the app](#step-11-verify-and-access-the-app)
+- [Deploy with Helm](#deploy-with-helm)
 - [GitLab CI/CD (Optional)](#gitlab-cicd-optional)
 - [Troubleshooting](#troubleshooting)
 - [Cleanup & Removing Resources](#cleanup--removing-resources)
@@ -81,16 +83,17 @@ The app listens on port **8080** and binds to `0.0.0.0` so it is reachable from 
 
 ## Prerequisites
 
-Before starting, make sure you have admin/root privileges when needed (for Docker and editing `/etc/hosts`, and for `minikube tunnel`).
+Before starting, ensure you have **administrator/root privileges** where needed (e.g., Docker, Minikube, running `minikube tunnel`, or editing `/etc/hosts`).
 
 | Tool | Minimum Version | Purpose |
 | --- | --- | --- |
-| Docker | 20.10+ | Build images and run Minikube (Docker driver) |
-| kubectl | 1.24+ | Kubernetes CLI |
-| Minikube | 1.35+ | Local Kubernetes cluster |
-| .NET SDK | 8.x | Build and run the app locally |
-| Git | 2.x | Clone the repository |
-| Web Browser / curl | - | Access and test the endpoint |
+| [Docker](https://www.docker.com/products/docker-desktop) | 20.10+ | Container runtime; Minikube uses Docker as driver |
+| [kubectl](https://kubernetes.io/docs/tasks/tools/) | 1.24+ | Kubernetes CLI to manage the cluster |
+| [Minikube](https://minikube.sigs.k8s.io/) | 1.35+ | Local Kubernetes cluster |
+| [Helm](https://helm.sh/) | 3.0+ | Package manager for Kubernetes (Helm deployment path) |
+| [.NET SDK 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) | 8.x | Build the API and run it locally (optional) |
+| [Git](https://git-scm.com/) | 2.x | Clone the repository |
+| Web Browser / curl | - | Access the app at `http://healthapi.local` |
 
 ---
 
@@ -133,6 +136,20 @@ kubectl version --client
 ```bash
 brew install minikube
 minikube version
+```
+
+### 5) Helm (macOS)
+
+Install:
+
+```bash
+brew install helm
+```
+
+Verify:
+
+```bash
+helm version
 ```
 
 ---
@@ -314,6 +331,74 @@ Expected:
 
 ---
 
+## Deploy with Helm
+
+This repository also includes a Helm chart located at `helm/` (at the repo root, aligned with `k8s/`).
+
+### Prerequisites for Helm deployment
+
+Before deploying with Helm, make sure:
+
+- You have Helm installed (`helm version`)
+- Your Minikube cluster is running (2 nodes, Docker driver)
+- Ingress addon is enabled (`minikube addons enable ingress`)
+- `healthapi.local` exists in `/etc/hosts`
+- `sudo minikube tunnel` is running
+
+### Install/Upgrade the chart
+
+From the repo root:
+
+```bash
+helm upgrade --install healthapi ./helm
+```
+
+Wait for resources to be ready:
+
+```bash
+kubectl rollout status deployment/healthapi-healthapi --timeout=120s
+kubectl wait --for=condition=Ready pod -l app.kubernetes.io/instance=healthapi --timeout=120s
+```
+
+Verify resources:
+
+```bash
+kubectl get pods,svc,ingress
+```
+
+Inspect the release:
+
+```bash
+helm list
+helm status healthapi
+```
+
+Access:
+
+- `http://healthapi.local/`
+
+### Upgrade example (image tag)
+
+If you built and loaded a new local image tag, you can upgrade by overriding values:
+
+```bash
+helm upgrade --install healthapi ./helm --set image.tag=1.0
+```
+
+### Uninstall
+
+```bash
+helm uninstall healthapi
+```
+
+> Note: This chart uses the image defined in `helm/values.yaml` (defaults to `healthapi:1.0`).  
+> For Minikube, you still need to build and load the image:
+>
+> - `docker build -t healthapi:1.0 ./HealthApi`
+> - `minikube image load healthapi:1.0`
+
+---
+
 ## GitLab CI/CD (Optional)
 
 This repo includes a GitLab pipeline definition in `.gitlab-ci.yaml`.
@@ -426,6 +511,14 @@ sudo sed -i '' '/healthapi.local/d' /etc/hosts
 .
 ├── .gitignore
 ├── .gitlab-ci.yaml
+├── helm/
+│   ├── Chart.yaml
+│   ├── values.yaml
+│   └── templates/
+│       ├── _helpers.tpl
+│       ├── deployment.yaml
+│       ├── ingress.yaml
+│       └── service.yaml
 ├── README.md
 ├── HealthApi/
 │   ├── HealthApi.csproj
