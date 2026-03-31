@@ -1,0 +1,63 @@
+stages:
+  - build
+  - docker-build
+  - image-push
+  - deploy
+
+variables:
+  IMAGE: "healthapi:${CI_COMMIT_SHORT_SHA}"
+  DOCKER_DRIVER: overlay2
+
+build:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:7.0
+  script:
+    - dotnet restore HealthApi
+    - dotnet build HealthApi -c Release --no-restore
+  artifacts:
+    paths:
+      - HealthApi/bin/
+    expire_in: 1h
+
+docker-build:
+  stage: docker-build
+  image: docker:24
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - docker build -t "$IMAGE" HealthApi
+    - docker image ls "$IMAGE"
+
+image-push:
+  stage: image-push
+  image: docker:24
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker push "$IMAGE"
+  rules:
+    - if: $CI_REGISTRY && ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master")
+      when: on_success
+    - when: never
+
+deploy:
+  stage: deploy
+  image: bitnami/kubectl:1.34
+  before_script:
+    - test -n "$KUBE_CONFIG_DATA"
+    - echo "$KUBE_CONFIG_DATA" | base64 -d > kubeconfig
+    - export KUBECONFIG=$PWD/kubeconfig
+  script:
+    - kubectl apply -f k8s/
+  environment:
+    name: production
+    url: http://healthapi.local
+  rules:
+    - if: $KUBE_CONFIG_DATA
+      when: manual
+    - when: never
