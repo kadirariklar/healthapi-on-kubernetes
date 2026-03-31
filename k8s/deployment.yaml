@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: healthapi-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: healthapi
+  template:
+    metadata:
+      labels:
+        app: healthapi
+    spec:
+      containers:
+      - name: healthapi
+        image: healthapi:1.0
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 15
