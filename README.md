@@ -1,6 +1,7 @@
 # Health API on Kubernetes with Minikube
 
 [![.NET 8](https://img.shields.io/badge/.NET%208-512BD4?style=for-the-badge)](https://dotnet.microsoft.com/)
+[![Bash](https://img.shields.io/badge/Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 [![Helm](https://img.shields.io/badge/Helm-0F1689?style=for-the-badge&logo=helm&logoColor=white)](https://helm.sh/)
@@ -17,6 +18,7 @@ Key points:
 - **App**: .NET 8 minimal API
 - **Endpoint**: `GET /health` returns JSON
 - **Port**: `8080`
+- **Scripts**: `scripts/` includes optional install/uninstall automation for macOS/Linux
 - **Ingress**: routes `healthapi.local` to the service and rewrites `/` → `/health`
 
 ---
@@ -45,7 +47,9 @@ Key points:
   - [Step 10: Deploy Kubernetes manifests](#step-10-deploy-kubernetes-manifests)
   - [Step 11: Verify and access the app](#step-11-verify-and-access-the-app)
 - [Deploy with Helm](#deploy-with-helm)
+- [Optional scripts](#optional-scripts)
 - [GitLab CI/CD (Optional)](#gitlab-cicd-optional)
+- [Project improvements](#project-improvements)
 - [Troubleshooting](#troubleshooting)
 - [Cleanup & Removing Resources](#cleanup--removing-resources)
 - [Project Structure](#project-structure)
@@ -170,6 +174,16 @@ cd healthapi-on-kubernetes
 ```
 
 > If you already have the project locally, just `cd` into the repo root.
+
+### Optional scripts
+
+This repository also includes optional automation scripts in the `scripts/` folder for macOS and Linux. These scripts are provided for convenience and are not required to use the project.
+
+- `scripts/install-k8s.sh` — starts Minikube, builds the Docker image, loads it into the cluster, enables ingress, starts a tunnel, and deploys the app with the Kubernetes manifests.
+- `scripts/install-helm.sh` — follows the same workflow and deploys the app with Helm instead of raw manifests.
+- `scripts/uninstall.sh` — cleans up the Helm release or manifests, stops any running `minikube tunnel`, deletes all Minikube profiles, removes the host entry, and deletes the local Docker image.
+
+Use these scripts if you want a faster one-command setup and teardown path.
 
 ### Step 2: Create the .NET project (HealthApi)
 
@@ -517,6 +531,10 @@ sudo sed -i '' '/healthapi.local/d' /etc/hosts
 .
 ├── .gitignore
 ├── .gitlab-ci.yaml
+├── scripts/
+│   ├── install-k8s.sh
+│   ├── install-helm.sh
+│   └── uninstall.sh
 ├── helm/
 │   ├── Chart.yaml
 │   ├── values.yaml
@@ -537,6 +555,16 @@ sudo sed -i '' '/healthapi.local/d' /etc/hosts
 ```
 
 ---
+
+## Project improvements
+
+This repository is a good starting point for a local Kubernetes deployment, but there are several directions to improve it:
+
+- Add a production-ready deployment path with TLS-enabled ingress and a real container registry.
+- Add a dedicated CI/CD pipeline that builds, scans, and publishes images automatically.
+- Add more API endpoints, request validation, logging, and structured error responses.
+- Add Kubernetes resource requests/limits, Horizontal Pod Autoscaling (HPA), and tighter security settings.
+- Add unit/integration tests for the API and end-to-end checks for the deployment.
 
 ## Kubernetes Objects Used
 
