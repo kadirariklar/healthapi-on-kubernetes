@@ -266,6 +266,8 @@ minikube status
 kubectl get nodes
 ```
 
+Note: Some commands may require `sudo` privileges; depending on your system, you may be prompted for your password.
+
 Expected output example:
 
 ```text
@@ -303,6 +305,8 @@ Enable NGINX Ingress addon:
 minikube addons enable ingress
 ```
 
+Note: This addon can take a little while to install and start the controller pods, especially the first time.
+
 Verify the ingress controller is running:
 
 ```bash
@@ -330,13 +334,15 @@ grep healthapi.local /etc/hosts
 
 ### Step 9: Start Minikube tunnel
 
-Start the tunnel (keep it running):
+Start the tunnel in a separate terminal and keep it running while you use the app:
 
 ```bash
 sudo minikube tunnel &
 ```
 
-> On some systems you may prefer running it in a dedicated terminal without `&` so you can see logs.
+> This command should be left running in a dedicated terminal. On some systems `sudo` is required to create the tunnel.
+> 
+> `sudo minikube tunnel` is expected to stay active while you access `http://healthapi.local`.
 
 ### Step 10: Deploy Kubernetes manifests
 
@@ -359,7 +365,7 @@ kubectl get pods,svc,ingress
 
 Browser:
 
-- `http://healthapi.local/`
+- `http://healthapi.local/health`
 
 CLI:
 
