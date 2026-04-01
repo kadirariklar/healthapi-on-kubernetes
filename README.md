@@ -1,5 +1,11 @@
 # Health API on Kubernetes with Minikube
 
+[![.NET 8](https://img.shields.io/badge/.NET%208-512BD4?style=for-the-badge)](https://dotnet.microsoft.com/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io/)
+[![Helm](https://img.shields.io/badge/Helm-0F1689?style=for-the-badge&logo=helm&logoColor=white)](https://helm.sh/)
+[![Minikube](https://img.shields.io/badge/Minikube-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://minikube.sigs.k8s.io/)
+
 .NET 8 Docker Kubernetes Minikube NGINX Ingress
 
 This project deploys a simple **.NET 8** minimal API called **HealthApi** on a local Kubernetes cluster using **Minikube**.  
