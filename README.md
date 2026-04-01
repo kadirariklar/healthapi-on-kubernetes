@@ -183,6 +183,31 @@ This repository also includes optional automation scripts in the `scripts/` fold
 - `scripts/install-helm.sh` — follows the same workflow and deploys the app with Helm instead of raw manifests.
 - `scripts/uninstall.sh` — cleans up the Helm release or manifests, stops any running `minikube tunnel`, deletes all Minikube profiles, removes the host entry, and deletes the local Docker image.
 
+How to run the scripts:
+
+```bash
+cd healthapi-on-kubernetes
+chmod +x scripts/*.sh
+./scripts/install-k8s.sh
+```
+
+or, for Helm deployment:
+
+```bash
+cd healthapi-on-kubernetes
+chmod +x scripts/*.sh
+./scripts/install-helm.sh
+```
+
+To clean up everything after use:
+
+```bash
+cd healthapi-on-kubernetes
+./scripts/uninstall.sh
+```
+
+If the scripts prompt for `sudo`, enter your password. The installer scripts handle Minikube, ingress, and tunnel setup automatically, while the uninstall script removes Minikube profiles and DNS entries.
+
 Use these scripts if you want a faster one-command setup and teardown path.
 
 ### Step 2: Create the .NET project (HealthApi)
