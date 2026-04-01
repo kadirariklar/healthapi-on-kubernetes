@@ -165,8 +165,8 @@ helm version
 ### Step 1: Clone the repository
 
 ```bash
-git clone <YOUR_REPO_URL_HERE>
-cd "case study"
+git clone https://github.com/kadirariklar/healthapi-on-kubernetes.git
+cd healthapi-on-kubernetes
 ```
 
 > If you already have the project locally, just `cd` into the repo root.
