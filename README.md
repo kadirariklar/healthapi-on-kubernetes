@@ -364,7 +364,6 @@ Browser:
 CLI:
 
 ```bash
-curl -i http://healthapi.local/
 curl -i http://healthapi.local/health
 ```
 
