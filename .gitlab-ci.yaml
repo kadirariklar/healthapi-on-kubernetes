@@ -5,12 +5,12 @@ stages:
   - deploy
 
 variables:
-  IMAGE: "healthapi:${CI_COMMIT_SHORT_SHA}"
+  IMAGE: "${CI_REGISTRY_IMAGE:-healthapi}:${CI_COMMIT_SHORT_SHA}"
   DOCKER_DRIVER: overlay2
 
 build:
   stage: build
-  image: mcr.microsoft.com/dotnet/sdk:7.0
+  image: mcr.microsoft.com/dotnet/sdk:8.0
   script:
     - dotnet restore HealthApi
     - dotnet build HealthApi -c Release --no-restore
@@ -54,6 +54,8 @@ deploy:
     - export KUBECONFIG=$PWD/kubeconfig
   script:
     - kubectl apply -f k8s/
+    - kubectl set image deployment/healthapi-deployment healthapi="$IMAGE" --record || true
+    - kubectl rollout status deployment/healthapi-deployment --timeout=120s || true
   environment:
     name: production
     url: http://healthapi.local
